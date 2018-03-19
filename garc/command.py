@@ -138,7 +138,9 @@ def get_argparser():
     parser.add_argument("--format", action="store", default="json",
                         dest="format", choices=["json"],
                         help="set output format")
-
+    parser.add_argument("--search_type", action="store", default="date",
+                        dest="search_type", choices=["date"],
+                        help="set search ordering")
 
 
     return parser
