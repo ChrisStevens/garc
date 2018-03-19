@@ -25,6 +25,7 @@ This is done doing the following command `pip install git+git://github.com/Chris
 ## Usage
 
 First you need to give garc your account information:
+
     garc configure
 
 You can then try out any search, for example:
