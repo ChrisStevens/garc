@@ -3,7 +3,7 @@ garc
 
 Garc is a python library and command line tool for collecting JSON data from Gab.ai
 
-Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) project published by the Documneting the Now project. Inspiration for structure, usage and outputs are from twarc, and garc is intended to be used for similar purposes.
+Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) project published by the Documenting the Now project. Inspiration for structure, usage and outputs are from twarc, and garc is intended to be used for similar purposes.
 
 Garc is still very much a work in progress, and is being constantly updated to add deeper functionality and as new features and changes are implemented by Gab.
 
@@ -30,5 +30,5 @@ First you need to give garc your account information:
 
 You can then try out any search, for example:
 
-    garc search maga
+    garc search maga > maga_posts.json
 
