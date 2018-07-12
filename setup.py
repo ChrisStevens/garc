@@ -4,7 +4,7 @@ import os
 from os.path import join
 from setuptools import setup
 
-__version__ = '0.0.9'
+__version__ = '0.1.0'
 
 if sys.version_info[0] < 3:
     dependencies = open(join('requirements', 'python2.txt')).read().split()

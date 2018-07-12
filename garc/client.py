@@ -7,9 +7,6 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-# from .decorators import *
-
-
 if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
@@ -39,6 +36,7 @@ class Garc(object):
         self.http_errors = http_errors
         self.cookie = None
         self.profile = profile
+        self.search_types = ['date']
 
 
 
@@ -49,24 +47,73 @@ class Garc(object):
 
         self.check_keys()
 
-    def search(self, q, search_type='date'):
+    def search(self, q, search_type='date',gabs = -1):
         """
-        Pass in a query. Defaults to recent sort by date.
+        Pass in a query. Defaults to recent sort by date. Defaults to retrieving as many historical gabs as possible.
         """
 
         # This can be expanded to other Gab search types
-        if search_type in ['date']:
+        if search_type in self.search_types:
             search_type = search_type
         else:
            search_type = 'date'
-        url = "https://gab.ai/api/search?q=%s&sort=%s" % (q,search_type)
 
-        resp = self.get(url, search_type = search_type)
-        posts = resp.json()["data"]
-        # embed()
-        for post in posts:
-            yield post
+        num_gabs = 0
+        while True:
+
+            url = "https://gab.ai/api/search?q=%s&sort=%s&before=%s" % (q,search_type,num_gabs)
+
+            resp = self.get(url)
+
+            # We should probably implement some better error catching than simply checking for a 500 to know we've gotten all the gabs possible
+            if resp.status_code == 500:
+                break
+            posts = resp.json()["data"]
+            for post in posts:
+                yield post
+            num_gabs += len(posts)
+            if  (num_gabs > gabs and gabs != -1):
+                break
+
+
   
+
+    def user(self,q):
+        'collect user json data'
+        url = 'https://gab.ai/users/%s' % (q)
+        resp = self.get(url)
+        yield resp.json()
+
+
+    def userposts(self,q):
+        '''collect posts from a user feed'''
+        base_url = "https://gab.ai/api/feed/%s" % (q)
+        url = base_url
+        while True:
+            resp = self.get(url)
+            posts = resp.json()["data"]
+            if len(posts) ==0:
+                break
+            last_published_date = posts[-1]['published_at']
+            url = base_url + '?before=%s' % (last_published_date)
+            for post in posts:
+                yield post
+
+    def usercomments(self,q):
+        '''collect comments from a users feed'''
+        base_url = "https://gab.ai/api/feed/%s/comments?includes=post.conversation_parent" % (q)
+        url = base_url
+        while True:
+
+            resp = self.get(url)
+            posts = resp.json()["data"]
+            if len(posts) == 0:
+                break
+            last_published_date = posts[-1]['published_at']
+            url = base_url + '&before=%s' % (last_published_date)         
+            for post in posts:
+                yield post
+
     def login(self):
         """
         Login to Gab to retrieve needed session token. 
@@ -78,30 +125,29 @@ class Garc(object):
         	logging.info("refreshing login cookie")
 
         url = "https://gab.ai/auth/login"
-
         input_token = requests.get('https://gab.ai/auth/login')
         page_info = BeautifulSoup(input_token.content, "html.parser")
         token = page_info.select('input[name=_token]')[0]['value']
         payload = {'username':self.user_account,'password':self.user_password,'_token':token}
 
         d = requests.request("POST", url, params=payload,cookies = input_token.cookies)
-        laravel_session = re.search('"id_token": "(.+)" }', d.content).group(1)
+        laravel_session = re.search('"id_token": "(.+)" }', d.content.decode('utf-8')).group(1)
         self.cookie = {'laravel_session': laravel_session}
 
     def get(self,url, **kwargs):
+        ''' Perform the API requests'''
         if not self.cookie:
             self.login()
-
-        # Pass allow 404 to not retry on 404
-        search_type = kwargs.pop('search_type','date')
 
         connection_error_count = kwargs.pop('connection_error_count', 0)
         try:
             logging.info("getting %s %s", url, kwargs)
 
             r = requests.get(url, cookies=self.cookie)
+            
+            # Maybe should implement allow_404 that stops retrying, ala twarcf
 
-            if r.status_code == 404 and not allow_404:
+            if r.status_code == 404:
                 logging.warn("404 from Gab API! trying again")
                 time.sleep(1)
                 r = self.get(url, **kwargs)
@@ -117,7 +163,6 @@ class Garc(object):
             else:
                 self.connect()
                 kwargs['connection_error_count'] = connection_error_count
-                kwargs['allow_404'] = allow_404
                 return self.get(url, **kwargs)
 
     def check_keys(self):

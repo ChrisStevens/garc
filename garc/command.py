@@ -10,7 +10,6 @@ import logging
 import datetime
 import argparse
 import fileinput
-from IPython import embed
 
 from garc import __version__
 from garc.client import Garc
@@ -32,6 +31,9 @@ commands = [
     'help',
     'sample',
     'search',
+    'user',
+    'userposts',
+    'usercomments'
 ]
 
 
@@ -71,17 +73,24 @@ def main():
         config=args.config,
         profile=args.profile    )
 
-    # calls that return tweets
+    # calls that return gabs
     if command == "search":
         things = g.search(
             query,
-            search_type=args.search_type
+            search_type=args.search_type,
+            gabs=args.number_gabs
         )
 
     elif command == "configure":
         g.input_keys()
         sys.exit()
+    elif command == 'user':
+        things = g.user(query)
 
+    elif command == 'userposts':
+        things = g.userposts(query)
+    elif command == 'usercomments':
+        things = g.usercomments(query)
     else:
         parser.print_help()
         print("\nPlease use one of the following commands:\n")
@@ -100,13 +109,10 @@ def main():
     
     for thing in things:
 
-        kind_of = type(thing)
-        if 'post' in thing:
-            # tweets and users
+        if 'post' in thing or 'username' in thing:
+            # gabs and users
             if (args.format == "json"):
                 print(json.dumps(thing), file=fh)
-            elif (args.format == "csv"):
-                csv_writer.writerow(get_row(thing))
             logging.info("archived %s", thing['id'])
 
 def get_argparser():
@@ -140,7 +146,10 @@ def get_argparser():
                         help="set output format")
     parser.add_argument("--search_type", action="store", default="date",
                         dest="search_type", choices=["date"],
-                        help="set search ordering")
+                        help="set search type")
+    parser.add_argument("--number_gabs", action="store",type=int, default=-1,
+                        dest="number_gabs",
+                        help="approximate number of gabs to return")
 
 
     return parser
