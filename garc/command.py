@@ -88,7 +88,11 @@ def main():
         things = g.user(query)
 
     elif command == 'userposts':
-        things = g.userposts(query)
+        things = g.userposts(
+            query,
+            gabs=args.number_gabs,
+            gabs_after=args.gabs_after
+        )
     elif command == 'usercomments':
         things = g.usercomments(query)
     else:
@@ -150,6 +154,9 @@ def get_argparser():
     parser.add_argument("--number_gabs", action="store",type=int, default=-1,
                         dest="number_gabs",
                         help="approximate number of gabs to return")
+    parser.add_argument("--gabs_after", action="store", default=-1,
+                        dest="gabs_after",
+                        help="approximate date of earliest gab you wish to collect")
 
 
     return parser

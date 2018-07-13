@@ -85,19 +85,26 @@ class Garc(object):
         yield resp.json()
 
 
-    def userposts(self,q):
+    def userposts(self,q,gabs=-1,gabs_after='2000-01-01'):
         '''collect posts from a user feed'''
         base_url = "https://gab.ai/api/feed/%s" % (q)
         url = base_url
+        num_gabs = 0
         while True:
             resp = self.get(url)
             posts = resp.json()["data"]
             if len(posts) ==0:
                 break
             last_published_date = posts[-1]['published_at']
+
             url = base_url + '?before=%s' % (last_published_date)
             for post in posts:
                 yield post
+            num_gabs += len(posts)
+            if last_published_date < gabs_after:
+                break
+            if  (num_gabs > gabs and gabs != -1):
+                break
 
     def usercomments(self,q):
         '''collect comments from a users feed'''
