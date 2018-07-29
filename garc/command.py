@@ -1,16 +1,11 @@
 from __future__ import print_function
 
-import os
-import re
 import sys
 import json
 import signal
 import codecs
 import logging
-import datetime
 import argparse
-import fileinput
-
 from garc import __version__
 from garc.client import Garc
 
@@ -18,12 +13,10 @@ if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
     str_type = unicode
-    import ConfigParser as configparser
 else:
     # Python 3
     get_input = input
     str_type = str
-    import configparser
 
 
 commands = [
@@ -65,13 +58,12 @@ def main():
         sys.exit(1)
 
     g = Garc(
-        user_account = args.user_account,
-        user_password = args.user_password,
-
+        user_account=args.user_account,
+        user_password=args.user_password,
         connection_errors=args.connection_errors,
         http_errors=args.http_errors,
         config=args.config,
-        profile=args.profile    )
+        profile=args.profile)
 
     # calls that return gabs
     if command == "search":
@@ -112,10 +104,9 @@ def main():
 
     
     for thing in things:
-
         if 'post' in thing or 'username' in thing:
             # gabs and users
-            if (args.format == "json"):
+            if args.format == "json":
                 print(json.dumps(thing), file=fh)
             logging.info("archived %s", thing['id'])
 
@@ -151,10 +142,10 @@ def get_argparser():
     parser.add_argument("--search_type", action="store", default="date",
                         dest="search_type", choices=["date"],
                         help="set search type")
-    parser.add_argument("--number_gabs", action="store",type=int, default=-1,
+    parser.add_argument("--number_gabs", action="store", type=int, default=-1,
                         dest="number_gabs",
                         help="approximate number of gabs to return")
-    parser.add_argument("--gabs_after", action="store", default=-1,
+    parser.add_argument("--gabs_after", action="store", default="2000-01-01",
                         dest="gabs_after",
                         help="approximate date of earliest gab you wish to collect")
 
