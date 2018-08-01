@@ -17,9 +17,12 @@ Please be respectful when using this and any data collection software, try not t
 
 ## Installation
 
-Currently the garc package hasn't been uploaded to PIP (that is top of our next steps), so installation must be done directly from github.
+There are two options for installing garc. 
 
-This is done doing the following command `pip install git+git://github.com/ChrisStevens/garc.git`
+1. From pypi the official python package repository, which will always have the most stable release:
+    `pip install garc`
+2. Directly from Github, which will have the newest release:
+    `pip install git+git://github.com/ChrisStevens/garc.git`
 
 
 ## Usage
