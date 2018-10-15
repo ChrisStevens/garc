@@ -7,10 +7,12 @@ Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) pr
 
 Garc is still very much a work in progress, and is being constantly updated to add deeper functionality and as new features and changes are implemented by Gab.
 
+Gab has recently released a full set of API docs (https://developers.gab.com/), which this current version does not use. A new version utilizing these more reliable API routes is in development and will be released before the end of October 2018.
+
 
 ## Warnings
 
-Gab's api is relatively sparsely documented, so things may change without warning and break searches.
+Gab's API was historically relatively sparsely documented, so things may change without warning and break searches. This current version relies on these potentially unreliable API routes. 
 
 Please be respectful when using this and any data collection software, try not to make excessive searches and calls.
 
