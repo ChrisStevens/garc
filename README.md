@@ -7,7 +7,7 @@ Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) pr
 
 Garc is still very much a work in progress, and is being constantly updated to add deeper functionality and as new features and changes are implemented by Gab.
 
-Gab has recently released a set of API docs (https://developers.gab.com/), which this current version does not use. A new version utilizing these new API routes is in development and will be released before the end of October 2018. Certain functionality, such as returning gabs via search don't appear in these new docs. The new version will perserve this functionality as well as adding the additional feed based functionaality in the newly released docs.
+Gab has recently released a set of API docs (https://developers.gab.com/), which this current version does not use. A new version utilizing these new API routes is in development and will be released when Gab comes back online. Certain functionality, such as returning gabs via search, doesn't appear in these new docs. The new version will perserve this functionality as well as adding the additional feed based functionaality in the newly released docs.
 
 
 ## Warnings
