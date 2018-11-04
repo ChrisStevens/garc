@@ -59,7 +59,7 @@ class Garc(object):
         num_gabs = 0
         while True:
 
-            url = "https://gab.ai/api/search?q=%s&sort=%s&before=%s" % (q, search_type, num_gabs)
+            url = "https://gab.com/api/search?q=%s&sort=%s&before=%s" % (q, search_type, num_gabs)
 
             resp = self.get(url)
 
@@ -79,7 +79,7 @@ class Garc(object):
         """
         collect user json data
         """
-        url = 'https://gab.ai/users/%s' % (q)
+        url = 'https://gab.com/users/%s' % (q)
         resp = self.get(url)
         yield resp.json()
 
@@ -88,7 +88,7 @@ class Garc(object):
         """
         collect posts from a user feed
         """
-        base_url = "https://gab.ai/api/feed/%s" % (q)
+        base_url = "https://gab.com/api/feed/%s" % (q)
         url = base_url
         num_gabs = 0
         while True:
@@ -111,7 +111,7 @@ class Garc(object):
         """
         collect comments from a users feed
         """
-        base_url = "https://gab.ai/api/feed/%s/comments?includes=post.conversation_parent" % (q)
+        base_url = "https://gab.com/api/feed/%s/comments?includes=post.conversation_parent" % (q)
         url = base_url
         while True:
 
@@ -134,8 +134,8 @@ class Garc(object):
         if self.cookie:
             logging.info("refreshing login cookie")
 
-        url = "https://gab.ai/auth/login"
-        input_token = requests.get('https://gab.ai/auth/login')
+        url = "https://gab.com/auth/login"
+        input_token = requests.get('https://gab.com/auth/login')
         page_info = BeautifulSoup(input_token.content, "html.parser")
         token = page_info.select('input[name=_token]')[0]['value']
         payload = {'username':self.user_account, 'password':self.user_password, '_token':token}
