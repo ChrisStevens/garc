@@ -66,8 +66,21 @@ class Garc(object):
             # We should probably implement some better error catching
             # not simply checking for a 500 to know we've gotten all the gabs possible
             if resp.status_code == 500:
+                logging.error("search for %s failed, recieved 500 from Gab.com", (q))
                 break
-            posts = resp.json()["data"]
+            elif resp.status_code == 429:
+                logging.warn("rate limited, sleeping two minutes")
+                time.sleep(100)
+                continue
+
+            posts = resp.json()['data']
+
+            # API seems to be more stable than previously and will not send 500
+            # as it runs out of data, now returns empty results
+            if not posts:
+                logging.info("No more posts returned for search: %s", (q))
+                break
+
             for post in posts:
                 yield post
             num_gabs += len(posts)
@@ -151,7 +164,7 @@ class Garc(object):
         if not self.cookie:
             self.login()
 
-        connection_error_count = kwargs.pop('connection_error_count', 0)
+        connection_error_count = kwargs.pop('connection_error_count', 1)
         try:
             logging.info("getting %s %s", url, kwargs)
 
@@ -160,7 +173,7 @@ class Garc(object):
 
             if r.status_code == 404:
                 logging.warn("404 from Gab API! trying again")
-                time.sleep(1)
+                time.sleep(10)
                 r = self.get(url, **kwargs)
             return r
         except requests.exceptions.ConnectionError as e:
