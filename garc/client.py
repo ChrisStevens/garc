@@ -137,6 +137,32 @@ class Garc(object):
             for post in posts:
                 yield post
 
+    def followers(self,q):
+        """
+        find all followers of a specific user
+        """
+        num_followers = 0
+        while True:
+            url = "https://gab.com/users/%s/followers?before=%s" % (q,num_followers)
+            resp = self.get(url)
+            posts = resp.json()["data"]
+            if not posts:
+                break
+            for post in posts:
+                yield post
+            num_followers += len(posts)
+
+    def following(self,q):
+        num_followers = 0
+        while True:
+            url = "https://gab.com/users/%s/following?before=%s" % (q,num_followers)
+            resp = self.get(url)
+            posts = resp.json()["data"]
+            if not posts:
+                break
+            for post in posts:
+                yield post
+            num_followers += len(posts)
     def login(self):
         """
         Login to Gab to retrieve needed session token.

@@ -26,7 +26,9 @@ commands = [
     'search',
     'user',
     'userposts',
-    'usercomments'
+    'usercomments',
+    'followers',
+    'following'
 ]
 
 
@@ -87,6 +89,10 @@ def main():
         )
     elif command == 'usercomments':
         things = g.usercomments(query)
+    elif command == 'followers':
+        things = g.followers(query)
+    elif command == 'following':
+        things = g.following(query)
     else:
         parser.print_help()
         print("\nPlease use one of the following commands:\n")
