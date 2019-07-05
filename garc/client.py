@@ -5,7 +5,6 @@ import logging
 import time
 import requests
 from bs4 import BeautifulSoup
-
 if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
@@ -57,10 +56,11 @@ class Garc(object):
             search_type = 'date'
 
         num_gabs = 0
+        max_id = ''
         while True:
 
-            url = "https://gab.com/api/search?q=%s&sort=%s&before=%s" % (q, search_type, num_gabs)
-
+            # url = "https://gab.com/api/search?q=%s&sort=%s&before=%s" % (q, search_type, num_gabs)
+            url = "https://gab.com/api/v1/timelines/tag/%s?max_id=%s" % (q, max_id)
             resp = self.get(url)
 
             # We should probably implement some better error catching
@@ -72,15 +72,14 @@ class Garc(object):
                 logging.warn("rate limited, sleeping two minutes")
                 time.sleep(100)
                 continue
-
-            posts = resp.json()['data']
+            posts = resp.json()
 
             # API seems to be more stable than previously and will not send 500
             # as it runs out of data, now returns empty results
             if not posts:
                 logging.info("No more posts returned for search: %s", (q))
                 break
-
+            max_id = posts[-1]['id']
             for post in posts:
                 yield post
             num_gabs += len(posts)
@@ -173,15 +172,15 @@ class Garc(object):
         if self.cookie:
             logging.info("refreshing login cookie")
 
-        url = "https://gab.com/auth/login"
-        input_token = requests.get('https://gab.com/auth/login')
+        url = "https://gab.com/auth/sign_in"
+        input_token = requests.get(url)
         page_info = BeautifulSoup(input_token.content, "html.parser")
-        token = page_info.select('input[name=_token]')[0]['value']
-        payload = {'username':self.user_account, 'password':self.user_password, '_token':token}
+        token = page_info.select('meta[name=csrf-token]')[0]['content']
+
+        payload = {'user[email]':self.user_account, 'user[password]':self.user_password, 'authenticity_token':token}
 
         d = requests.request("POST", url, params=payload, cookies=input_token.cookies)
-        laravel_session = re.search('"id_token": "(.+)" }', d.content.decode('utf-8')).group(1)
-        self.cookie = {'laravel_session': laravel_session}
+        self.cookie = d.cookies
 
     def get(self, url, **kwargs):
         """

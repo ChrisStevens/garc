@@ -8,7 +8,6 @@ import logging
 import argparse
 from garc import __version__
 from garc.client import Garc
-
 if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
@@ -110,11 +109,15 @@ def main():
 
     
     for thing in things:
-        if 'post' in thing or 'username' in thing:
-            # gabs and users
-            if args.format == "json":
-                print(json.dumps(thing), file=fh)
-            logging.info("archived %s", thing['id'])
+        if args.format == "json":
+            print(json.dumps(thing), file=fh)
+        logging.info("archived %s", thing['id'])
+
+        # if 'post' in thing or 'username' in thing:
+        #     # gabs and users
+        #     if args.format == "json":
+        #         print(json.dumps(thing), file=fh)
+        #     logging.info("archived %s", thing['id'])
 
 def get_argparser():
     """
