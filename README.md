@@ -1,6 +1,13 @@
 garc: Python and Command-Line Interface for Gab.ai API
 =====
 
+**AS OF JULY 4 2019 GAB HAS MOVED TO A NEW DECENTRALIZED MODEL UTILIZING MASTODON. CURRENTLY THIS PACKAGE DOES NOT WORK, AND GAB ITSELF HAS VERY LIMITED FUNCTIONALITY.**
+
+**SEE BRANCH mastadon-fix FOR CURRENTLY WORKING AND NEWLY IMPLEMENTED FEATURES DO TO THIS CHANGE. CURRENTLY ONLY SEARCH WORKS AND IS NOW A HASHTAG BASED SEARCH AS OPPOSED TO THE TEXT BASED SEARCH WHICH PREVIOUSLY EXISTED**
+
+
+
+
 Garc is a python library and command line tool for collecting JSON data from Gab.ai
 
 Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) project published by the Documenting the Now project. Inspiration for structure, usage and outputs are from twarc, and garc is intended to be used for similar purposes.
