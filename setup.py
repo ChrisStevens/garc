@@ -4,7 +4,7 @@ import os
 from os.path import join
 from setuptools import setup
 
-__version__ = '1.2'
+__version__ = '2.0'
 
 
 with open("README.md") as f:

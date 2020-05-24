@@ -8,7 +8,6 @@ import logging
 import argparse
 from garc import __version__
 from garc.client import Garc
-
 if sys.version_info[:2] <= (2, 7):
     # Python 2
     get_input = raw_input
@@ -26,7 +25,10 @@ commands = [
     'search',
     'user',
     'userposts',
-    'usercomments'
+    'usercomments',
+    'followers',
+    'following',
+    'publicsearch'
 ]
 
 
@@ -87,6 +89,16 @@ def main():
         )
     elif command == 'usercomments':
         things = g.usercomments(query)
+    elif command == 'followers':
+        things = g.followers(query)
+    elif command == 'following':
+        things = g.following(query)
+    elif command == 'publicsearch':
+        things = g.public_search(
+            query,
+            gabs=args.number_gabs
+        )
+
     else:
         parser.print_help()
         print("\nPlease use one of the following commands:\n")
@@ -104,11 +116,15 @@ def main():
 
     
     for thing in things:
-        if 'post' in thing or 'username' in thing:
-            # gabs and users
-            if args.format == "json":
-                print(json.dumps(thing), file=fh)
-            logging.info("archived %s", thing['id'])
+        if args.format == "json":
+            print(json.dumps(thing), file=fh)
+        logging.info("archived %s", thing['id'])
+
+        # if 'post' in thing or 'username' in thing:
+        #     # gabs and users
+        #     if args.format == "json":
+        #         print(json.dumps(thing), file=fh)
+        #     logging.info("archived %s", thing['id'])
 
 def get_argparser():
     """

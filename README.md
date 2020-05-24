@@ -1,23 +1,13 @@
-garc: Python and Command-Line Interface for Gab.ai API
+garc: Python and Command-Line Interface for Gab.com API
 =====
 
-**AS OF JULY 4 2019 GAB HAS MOVED TO A NEW DECENTRALIZED MODEL UTILIZING MASTODON. CURRENTLY THIS PACKAGE DOES NOT WORK, AND GAB ITSELF HAS VERY LIMITED FUNCTIONALITY.**
-
-**SEE BRANCH mastadon-fix FOR CURRENTLY WORKING AND NEWLY IMPLEMENTED FEATURES DUE TO THIS CHANGE. CURRENTLY ONLY SEARCH WORKS AND IS NOW A HASHTAG BASED SEARCH AS OPPOSED TO THE TEXT BASED SEARCH WHICH PREVIOUSLY EXISTED**
-
-**THIS NEW BRAANCH CAN BE INSTALLED VIA PIP**
-`pip install git+git://github.com/ChrisStevens/garc@mastodon-fix`
-
-
-
-
-Garc is a python library and command line tool for collecting JSON data from Gab.ai
+Garc is a python library and command line tool for collecting JSON data from Gab.com. In July 2019, Gab switched its platform to a fork of Mastodon, this package was origionally written prior to this switch, but has been updated to work as well as possible with the new functionality of Mastodon.
 
 Garc is built based on the wonderful [twarc](https://github.com/DocNow/twarc) project published by the Documenting the Now project. Inspiration for structure, usage and outputs are from twarc, and garc is intended to be used for similar purposes.
 
 Garc is still very much a work in progress, and is being constantly updated to add deeper functionality and as new features and changes are implemented by Gab.
 
-Gab has recently released a set of API docs (https://developers.gab.com/), which this current version does not use. A new version utilizing these new API routes is in development and will be released soon after Gab comes back online. Certain functionality, such as returning gabs via search, doesn't appear in these new docs. The new version will perserve this functionality as well as adding the additional feed based functionaality in the newly released docs.
+Please use your own judgement as to the usage of garc and whether you are adhearing to both Gab's Terms of Service and robots.txt.
 
 
 ## Warnings
@@ -50,19 +40,40 @@ You only need the username and password for your account created at Gab.ai. With
 
 ### Search
 
-Using the Gab search API you can collect posts based on a search term. As Gab's API is mostly undoumented it is hard to know exactly what the searches return (it is however the same data as appears on the Gab website for a search). Initial tests have found matches for the search term in both the post body and the users description, and the search uses some type of fuzzy matching or word stemming, as matches for not exact terms have shown up.
+Using the Gab search API you can collect posts based on a hashtag. Unfortunately with how Gab's Mastodon instance is set up, you can't perform text searches. To simulate a text search use the Public Search function, which searches the public timeline for gabs matching your term. 
 
 A simple call
     
     garc search maga
 
-Will return as many historical gabs as are available (usually around 9000 irrespective of post dates).
+Will return as many historical gabs as are available in the hashtag search.
 
 You can also limit the number of returns with the --number_gabs parameter
 
     garc search maga --number_gabs=100
 
 Which will return approxiately 100 of the most recent posts.
+
+
+### Public Search
+
+Using the public timeline function of Mastodon this will query all new posts and return those which match the given search term. This is a time intensive process, and by default only returns posts for the last 15 minutes. It is also not entirely precise, as posts are not necessarily returned in order, so ocassionally the search will be terminated prior to collecting all posts in the given timeframe.
+
+A simple call
+    
+    garc publicsearch maga
+
+Will return as many historical posts as are available matching the search term in the last 15 minutes.
+
+You can also limit the number of returns with the --number_gabs parameter
+
+    garc publicsearch maga --number_gabs=100
+
+Which will return approxiately 100 of the most recent posts.
+
+You can also simply return all posts for the given time period by calling
+	
+    garc publicsearch
 
 
 
