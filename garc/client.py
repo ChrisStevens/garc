@@ -36,6 +36,7 @@ class Garc(object):
         self.cookie = None
         self.profile = profile
         self.search_types = ['date']
+        self.access_token = None
 
 
 
@@ -87,20 +88,19 @@ class Garc(object):
             num_gabs += len(posts)
             if  (num_gabs > gabs and gabs != -1):
                 break
-    def public_search(self, q,  gabs=-1,gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
+
+    def pro_search(self, q,  gabs=-1,gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
         """
         Pass in a query. 
-        Searches the public Gab timeline for posts which match query q
+        Searches the pro Gab timeline for posts which match query q
         Match is case insensitive
         """
 
         num_gabs = 0
         max_id = ''
         while True:
-
-            url = "https://gab.com/api/v1/timelines/public?limit=40&max_id=%s" % (max_id)  
-
-            resp = self.anonymous_get(url)
+            url = "https://gab.com/api/v1/timelines/pro?limit=40&max_id=%s" % (max_id)  
+            resp = self.get(url)
             # time.sleep(1)
 
             # We should probably implement some better error catching
@@ -142,6 +142,131 @@ class Garc(object):
                             logging.info("Gabs after condition met: %s", (q))
 
                             break
+
+
+
+
+
+    def featured_search(self, q,  gabs=-1,gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M")):
+        """
+        Pass in a query. 
+        Searches the various featured Gab timeline for posts which match query q
+        Match is case insensitive
+        """
+        # As the feeds are non-exclusive there will be duplicates, so we need to filter
+        seen_ids = []
+        featured_urls = ["https://gab.com/api/v1/timelines/group_collection/featured?sort_by=hot&limit=40&max_id=","https://gab.com/api/v1/timelines/group_collection/featured?limit=40&max_id=" ,"https://gab.com/api/v1/timelines/group_collection/featured?sort_by=top_today&limit=40&max_id="]
+        for url_raw in featured_urls:
+            num_gabs = 0
+            max_id = ''
+            while True:
+                url = url_raw + max_id
+
+
+                resp = self.get(url)
+                # time.sleep(1)
+
+                # We should probably implement some better error catching
+                # not simply checking for a 500 to know we've gotten all the gabs possible
+                if resp.status_code == 500:
+                    logging.error("search for %s failed, recieved 500 from Gab.com", (q))
+                    return
+                elif resp.status_code == 429:
+                    logging.warn("rate limited, sleeping two minutes")
+                    time.sleep(100)
+                    break
+                posts = resp.json()
+
+                # API seems to be more stable than previously and will not send 500
+                # as it runs out of data, now returns empty results
+                if not posts:
+                    logging.info("No more posts returned for search: %s", (q))
+                    break
+
+                for post in posts:
+                    # filter for duplicates
+                    post_id = post['id']
+                    max_id = post_id
+                    max_created_at = post['created_at']
+                    if post_id in seen_ids:
+                        continue
+                    else:
+                        seen_ids.append(post['id'])
+                    if self.search_gab_text(post,q):
+                        yield self.format_post(post)
+                num_gabs += len(posts)
+                if  (num_gabs > gabs and gabs != -1):
+                    logging.info("Number of gabs condition met: %s", (q))
+                    break
+
+                # Check if first collected gab is after the date specified
+                # The API returns strange results sometimes where gabs are not in date order, so ocassionally random dates pop up
+                # But these never seem to appear at the start, so checking the first item keeps the function from prematurely ending
+                # It does mean an additional call is made however
+                # Each featured feed is only a few pages long as of 2020-08-14, so this is commented out for the time being
+                # if posts[0]['created_at'] < gabs_after:
+                #     if posts[1]['created_at'] < gabs_after:
+                #         if posts[2]['created_at'] < gabs_after:
+                #             if posts[-1]['created_at'] < gabs_after:
+
+                #                 logging.info("Gabs after condition met: %s", (q))
+
+                #                 break
+
+
+    # def public_search(self, q,  gabs=-1,gabs_after=(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=20)).strftime("%Y-%m-%dT%H:%M")):
+    #     """
+    #     Pass in a query. 
+    #     Searches the public Gab timeline for posts which match query q
+    #     Match is case insensitive
+    #     """
+
+    #     num_gabs = 0
+    #     max_id = ''
+    #     while True:
+    #         url = "https://gab.com/api/v1/timelines/group_collection/featured?sort_by=top_today&limit=40&max_id=%s" % (max_id)  
+    #         resp = self.anonymous_get(url)
+    #         # time.sleep(1)
+
+    #         # We should probably implement some better error catching
+    #         # not simply checking for a 500 to know we've gotten all the gabs possible
+    #         if resp.status_code == 500:
+    #             logging.error("search for %s failed, recieved 500 from Gab.com", (q))
+    #             return
+    #         elif resp.status_code == 429:
+    #             logging.warn("rate limited, sleeping two minutes")
+    #             time.sleep(100)
+    #             break
+    #         posts = resp.json()
+
+    #         # API seems to be more stable than previously and will not send 500
+    #         # as it runs out of data, now returns empty results
+    #         if not posts:
+    #             logging.info("No more posts returned for search: %s", (q))
+    #             break
+
+    #         for post in posts:
+    #             if self.search_gab_text(post,q):
+    #                 yield self.format_post(post)
+    #             max_id = post['id']
+    #             max_created_at = post['created_at']
+    #         num_gabs += len(posts)
+    #         if  (num_gabs > gabs and gabs != -1):
+    #             logging.info("Number of gabs condition met: %s", (q))
+    #             break
+
+    #         # Check if first collected gab is after the date specified
+    #         # The API returns strange results sometimes where gabs are not in date order, so ocassionally random dates pop up
+    #         # But these never seem to appear at the start, so checking the first item keeps the function from prematurely ending
+    #         # It does mean an additional call is made however
+    #         # if posts[0]['created_at'] < gabs_after:
+    #         #     if posts[1]['created_at'] < gabs_after:
+    #         #         if posts[2]['created_at'] < gabs_after:
+    #         #             if posts[-1]['created_at'] < gabs_after:
+
+    #         #                 logging.info("Gabs after condition met: %s", (q))
+
+    #         #                 break
     def user(self, q):
         """
         collect user json data
@@ -214,7 +339,7 @@ class Garc(object):
         input_token = requests.get(url)
         page_info = BeautifulSoup(input_token.content, "html.parser")
         token = page_info.select('meta[name=csrf-token]')[0]['content']
-
+        self.access_token = token
         payload = {'user[email]':self.user_account, 'user[password]':self.user_password, 'authenticity_token':token}
 
         d = requests.request("POST", url, params=payload, cookies=input_token.cookies)

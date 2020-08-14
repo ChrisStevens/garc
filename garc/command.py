@@ -28,7 +28,9 @@ commands = [
     'usercomments',
     'followers',
     'following',
-    'publicsearch'
+    'publicsearch',
+    'prosearch',
+    'featuredsearch'
 ]
 
 
@@ -98,7 +100,16 @@ def main():
             query,
             gabs=args.number_gabs
         )
-
+    elif command == 'prosearch':
+        things = g.pro_search(
+            query,
+            gabs=args.number_gabs
+        )
+    elif command == 'featuredsearch':
+        things = g.featured_search(
+            query,
+            gabs=args.number_gabs
+        )
     else:
         parser.print_help()
         print("\nPlease use one of the following commands:\n")
