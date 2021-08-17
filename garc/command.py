@@ -21,7 +21,6 @@ else:
 commands = [
     'configure',
     'help',
-    'sample',
     'search',
     'user',
     'userposts',
