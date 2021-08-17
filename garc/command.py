@@ -25,9 +25,6 @@ commands = [
     'user',
     'userposts',
     'usercomments',
-    'followers',
-    'following',
-    'publicsearch',
     'top'
 ]
 
