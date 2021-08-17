@@ -27,7 +27,8 @@ commands = [
     'usercomments',
     'followers',
     'following',
-    'publicsearch'
+    'publicsearch',
+    'top'
 ]
 
 
@@ -97,6 +98,8 @@ def main():
             query,
             gabs=args.number_gabs
         )
+    elif command == 'top':
+        things = g.top(timespan=query if query else None)
 
     else:
         parser.print_help()

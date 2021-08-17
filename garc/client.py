@@ -150,6 +150,14 @@ class Garc(object):
         resp = self.get(url)
         yield resp.json()
 
+    def top(self, timespan=None):
+        if timespan is None: timespan = "today"
+        assert timespan in ["today", "weekly", "monthly", "yearly"]
+
+        url = "https://gab.com/api/v1/timelines/explore?sort_by=top_%s" % timespan
+        resp = self.anonymous_get(url)
+        return resp.json()
+
 
     def userposts(self, q, gabs=-1, gabs_after='2000-01-01'):
         """
