@@ -20,6 +20,7 @@ else:
 
 commands = [
     'configure',
+    'user_agent',
     'help',
     'search',
     'user',
@@ -72,6 +73,9 @@ def main():
             gabs=args.number_gabs
         )
 
+    elif command == 'user_agent':
+        g.save_user_agent()
+        sys.exit()
     elif command == "configure":
         g.input_keys()
         sys.exit()

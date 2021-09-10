@@ -39,12 +39,16 @@ class Garc(object):
 
 
 
+
+
+
         if config:
             self.config = config
         else:
             self.config = self.default_config()
 
         self.check_keys()
+        self.load_headers()
 
     def search(self, q, search_type='date', gabs=-1):
         """
@@ -155,6 +159,7 @@ class Garc(object):
         assert timespan in ["today", "weekly", "monthly", "yearly"]
 
         url = "https://gab.com/api/v1/timelines/explore?sort_by=top_%s" % timespan
+
         resp = self.anonymous_get(url)
         return resp.json()
 
@@ -219,13 +224,13 @@ class Garc(object):
             logging.info("refreshing login cookie")
 
         url = "https://gab.com/auth/sign_in"
-        input_token = requests.get(url)
+        input_token = requests.get(url,headers = self.headers)
         page_info = BeautifulSoup(input_token.content, "html.parser")
         token = page_info.select('meta[name=csrf-token]')[0]['content']
 
         payload = {'user[email]':self.user_account, 'user[password]':self.user_password, 'authenticity_token':token}
 
-        d = requests.request("POST", url, params=payload, cookies=input_token.cookies)
+        d = requests.request("POST", url, params=payload, cookies=input_token.cookies,headers = self.headers)
         self.cookie = d.cookies
 
     def followers(self,q):
@@ -272,7 +277,7 @@ class Garc(object):
         try:
             logging.info("getting %s %s", url, kwargs)
 
-            r = requests.get(url, cookies=self.cookie)
+            r = requests.get(url, cookies=self.cookie, headers = self.headers)
             # Maybe should implement allow_404 that stops retrying, ala twarc
 
             if r.status_code == 404:
@@ -297,8 +302,7 @@ class Garc(object):
         connection_error_count = kwargs.pop('connection_error_count', 1)
         try:
             logging.info("getting %s %s", url, kwargs)
-
-            r = requests.get(url)
+            r = requests.get(url, headers = self.headers)
             # Maybe should implement allow_404 that stops retrying, ala twarc
 
             if r.status_code == 404:
@@ -339,6 +343,25 @@ class Garc(object):
         return post
 
 
+    def load_headers(self):
+
+        path = self.config
+        profile = self.profile
+        config = configparser.ConfigParser()
+        config.read(self.config)
+        if 'headers' not in config.sections():
+            user_agent = 'garc'
+        else:
+            user_agent = config.get('headers','user_agent')
+
+        headers = {
+            'User-Agent' : user_agent
+        }
+
+        setattr(self,'headers',headers)
+
+
+
     def check_keys(self):
         """
         Get the Gab account info. Order of precedence is command line,
@@ -358,6 +381,8 @@ class Garc(object):
 
         return self.user_password and self.user_password
 
+
+
     def load_config(self):
         """
         Attempt to load gab info from config file
@@ -371,6 +396,10 @@ class Garc(object):
 
         config = configparser.ConfigParser()
         config.read(self.config)
+
+        if profile not in config.sections():
+            return {}
+
         data = {}
         for key in ['user_account', 'user_password']:
             try:
@@ -389,6 +418,7 @@ class Garc(object):
         if not self.config:
             return
         config = configparser.ConfigParser()
+        config.read(self.config)
         config.add_section(self.profile)
         config.set(self.profile, 'user_account', self.user_account)
         config.set(self.profile, 'user_password', self.user_password)
@@ -413,3 +443,22 @@ class Garc(object):
         Default config file path
         """
         return os.path.join(os.path.expanduser("~"), ".garc")
+
+
+
+
+    def save_user_agent(self):
+        config = configparser.ConfigParser()
+        config.read(self.config)
+        print("\nPlease enter user_agent info.\n")
+
+        def i(name):
+            return get_input(name.replace('_', ' ') + ": ")
+
+        self.user_agent = i('user_agent')
+        if 'headers' not in config.sections():
+            config.add_section('headers')
+        config.set('headers', 'user_agent', self.user_agent)
+        with open(self.config, 'w') as config_file:
+            config.write(config_file)
+
