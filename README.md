@@ -54,29 +54,6 @@ You can also limit the number of returns with the --number_gabs parameter
 
 Which will return approxiately 100 of the most recent posts.
 
-
-### Public Search
-
-Using the public timeline function of Mastodon this will query all new posts and return those which match the given search term. This is a time intensive process, and by default only returns posts for the last 15 minutes. It is also not entirely precise, as posts are not necessarily returned in order, so ocassionally the search will be terminated prior to collecting all posts in the given timeframe.
-
-A simple call
-    
-    garc publicsearch maga
-
-Will return as many historical posts as are available matching the search term in the last 15 minutes.
-
-You can also limit the number of returns with the --number_gabs parameter
-
-    garc publicsearch maga --number_gabs=100
-
-Which will return approxiately 100 of the most recent posts.
-
-You can also simply return all posts for the given time period by calling
-	
-    garc publicsearch
-
-
-
 ### User Posts
 
 Another way to collect posts is by collecting all the posts made by a single user
@@ -101,3 +78,14 @@ You can also collect the information of a user
     garc user fakeusername
 
 Which will return a json object of information about the user
+
+### Top
+
+You can collect the "top posts" of the day, week, month, or year:
+
+    garc top  # will get top posts of the day
+    garc top weekly
+    garc top monthly
+    garc top yearly
+
+This will return the top 15 or so posts that day.
