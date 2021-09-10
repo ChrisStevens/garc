@@ -170,7 +170,7 @@ class Garc(object):
         """
         # We need to get the account id to collect statuses
         account_url = 'https://gab.com/api/v1/account_by_username/%s' % (q)
-        account_id = self.get(account_url).json()['id']
+        account_id = self.get(account_url, headers=self.headers).json()['id']
         max_id = ''
         base_url = "https://gab.com/api/v1/accounts/%s/statuses?exclude_replies=true&max_id=" % (account_id)
         
@@ -196,7 +196,7 @@ class Garc(object):
         """
         # We need to get the account id to collect statuses
         account_url = 'https://gab.com/api/v1/account_by_username/%s' % (q)
-        account_id = self.get(account_url).json()['id']
+        account_id = self.get(account_url, headers=self.headers).json()['id']
         max_id = ''
         base_url = "https://gab.com/api/v1/accounts/%s/statuses?only_comments=true&exclude_replies=false&max_id=" % (account_id)
         
