@@ -26,6 +26,7 @@ commands = [
     'user',
     'userposts',
     'usercomments',
+    'statuses',
     'top'
 ]
 
@@ -101,6 +102,8 @@ def main():
         )
     elif command == 'top':
         things = g.top(timespan=query if query else None)
+    elif command == 'statuses':
+        things = g.statuses(query)
 
     else:
         parser.print_help()
