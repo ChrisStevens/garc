@@ -163,6 +163,10 @@ class Garc(object):
         resp = self.anonymous_get(url)
         return resp.json()
 
+    def statuses(self, q):
+        url = "https://gab.com/api/v1/statuses/%s" % (q)
+        resp = self.get(url)
+        yield resp.json()
 
     def userposts(self, q, gabs=-1, gabs_after='2000-01-01'):
         """

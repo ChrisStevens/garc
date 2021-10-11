@@ -89,3 +89,11 @@ You can collect the "top posts" of the day, week, month, or year:
     garc top yearly
 
 This will return the top 15 or so posts that day.
+
+### Statuses
+
+You can retrieve a single post by its ID:
+
+	garc statuses 106525740881070143
+	
+This will return Andrew Torba's current pinned Gab. 
