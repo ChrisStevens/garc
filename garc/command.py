@@ -26,7 +26,9 @@ commands = [
     'user',
     'userposts',
     'usercomments',
-    'top'
+    'top',
+    'group',
+    'groupposts',
 ]
 
 
@@ -81,7 +83,10 @@ def main():
         sys.exit()
     elif command == 'user':
         things = g.user(query)
-
+    elif command == 'group':
+        things = g.group(query)
+    elif command == 'groupposts':
+        things = g.groupposts(query)
     elif command == 'userposts':
         things = g.userposts(
             query,

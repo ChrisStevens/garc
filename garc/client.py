@@ -156,6 +156,40 @@ class Garc(object):
         resp = self.get(url)
         yield resp.json()
 
+    def group(self, q):
+        """
+        collect group json data
+        q should be the group ID
+        """
+        url = 'https://gab.com/api/v1/groups/%s' % (q)
+        resp = self.get(url)
+        yield resp.json()
+
+    def groupposts(self, q, gabs=-1, gabs_after='2000-01-01'):
+        """
+        collect posts from a group feed
+        q should be the group ID
+        """
+        base_url = 'https://gab.com/api/v1/timelines/group/%s?sort_by=newest&page=' % (q)
+        page = 1
+        num_gabs = 0
+        while True:
+            url = base_url + str(page)
+            page += 1
+            resp = self.get(url)
+            posts = resp.json()
+            if not posts:
+                break
+            last_published_date = posts[-1]['created_at']
+            for post in posts:
+                yield self.format_post(post)
+            num_gabs += len(posts)
+            if last_published_date < gabs_after:
+                break
+            if (num_gabs > gabs and gabs != -1):
+                break
+
+
     def top(self, timespan=None):
         if timespan is None: timespan = "today"
         assert timespan in ["today", "weekly", "monthly", "yearly"]
