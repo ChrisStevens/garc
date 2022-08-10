@@ -86,7 +86,11 @@ def main():
     elif command == 'group':
         things = g.group(query)
     elif command == 'groupposts':
-        things = g.groupposts(query)
+        things = g.groupposts(
+            query,
+            gabs=args.number_gabs,
+            gabs_after=args.gabs_after
+        )
     elif command == 'userposts':
         things = g.userposts(
             query,
