@@ -17,6 +17,7 @@ else:
     get_input = input
     str_type = str
     import configparser
+from http.cookiejar import MozillaCookieJar
 
 class Garc(object):
     """
@@ -33,19 +34,20 @@ class Garc(object):
         self.user_password = user_password
         self.connection_errors = connection_errors
         self.http_errors = http_errors
-        self.cookie = None
         self.profile = profile
         self.search_types = ['date']
-
-
-
-
-
 
         if config:
             self.config = config
         else:
             self.config = self.default_config()
+
+        self.cookie_file = self.config + "_cookies.txt"
+        self.cookie = MozillaCookieJar(self.cookie_file)
+        try:
+            self.cookie.load()
+        except FileNotFoundError:
+            pass
 
         self.check_keys()
         self.load_headers()
@@ -154,6 +156,40 @@ class Garc(object):
         resp = self.get(url)
         yield resp.json()
 
+    def group(self, q):
+        """
+        collect group json data
+        q should be the group ID
+        """
+        url = 'https://gab.com/api/v1/groups/%s' % (q)
+        resp = self.get(url)
+        yield resp.json()
+
+    def groupposts(self, q, gabs=-1, gabs_after='2000-01-01'):
+        """
+        collect posts from a group feed
+        q should be the group ID
+        """
+        base_url = 'https://gab.com/api/v1/timelines/group/%s?sort_by=newest&page=' % (q)
+        page = 1
+        num_gabs = 0
+        while True:
+            url = base_url + str(page)
+            page += 1
+            resp = self.get(url)
+            posts = resp.json()
+            if not posts:
+                break
+            last_published_date = posts[-1]['created_at']
+            for post in posts:
+                yield self.format_post(post)
+            num_gabs += len(posts)
+            if last_published_date < gabs_after:
+                break
+            if (num_gabs > gabs and gabs != -1):
+                break
+
+
     def top(self, timespan=None):
         if timespan is None: timespan = "today"
         assert timespan in ["today", "weekly", "monthly", "yearly"]
@@ -224,14 +260,16 @@ class Garc(object):
             logging.info("refreshing login cookie")
 
         url = "https://gab.com/auth/sign_in"
-        input_token = requests.get(url,headers = self.headers)
+        session = requests.Session()
+        session.cookies = self.cookie
+        input_token = session.get(url,headers = self.headers)
         page_info = BeautifulSoup(input_token.content, "html.parser")
         token = page_info.select('meta[name=csrf-token]')[0]['content']
 
         payload = {'user[email]':self.user_account, 'user[password]':self.user_password, 'authenticity_token':token}
 
-        d = requests.request("POST", url, params=payload, cookies=input_token.cookies,headers = self.headers)
-        self.cookie = d.cookies
+        session.post(url, params=payload, headers = self.headers)
+        self.cookie.save()
 
     def followers(self,q):
         """
